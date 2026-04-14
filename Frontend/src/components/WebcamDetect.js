@@ -19,7 +19,7 @@ export default function WebcamDetect() {
     const img = canvas.toDataURL("image/jpeg");
 
     const res = await axios.post(
-      "http://localhost:5000/api/detect/webcam",
+      `${process.env.REACT_APP_API}/api/detect/webcam`,
       { image: img }
     );
 

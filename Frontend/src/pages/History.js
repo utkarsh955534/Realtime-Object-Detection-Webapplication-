@@ -8,7 +8,7 @@ export default function History() {
     const fetchHistory = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/api/history/",
+          `${process.env.REACT_APP_API}/api/history/",
           {
             headers: {
               Authorization: "Bearer " + localStorage.getItem("token")

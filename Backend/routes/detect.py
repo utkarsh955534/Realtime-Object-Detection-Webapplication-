@@ -6,7 +6,7 @@ from utils.auth_middleware import token_required
 
 detect_routes = Blueprint('detect', __name__)
 
-# 🔥 Hugging Face API URL (CORRECT)
+# ✅ FINAL CORRECT HF URL
 HF_URL = "https://utkarsh9555-yolo-space.hf.space/run/predict"
 
 
@@ -22,14 +22,17 @@ def upload():
         if not file:
             return jsonify({"error": "File required"}), 400
 
-        # 🔥 Convert image → pure base64 (NO prefix)
+        # 🔥 Convert image → base64 (NO prefix)
         image_bytes = file.read()
         base64_image = base64.b64encode(image_bytes).decode("utf-8")
 
-        # 🔥 Send to HF
+        # 🔥 Send to HF (IMPORTANT FIX)
         response = requests.post(
             HF_URL,
-            json={"data": [base64_image]},
+            json={
+                "data": [base64_image],
+                "fn_index": 0
+            },
             timeout=30
         )
 
@@ -83,10 +86,13 @@ def webcam():
         if "base64," in image:
             image = image.split("base64,")[1]
 
-        # 🔥 Send to HF
+        # 🔥 Send to HF (IMPORTANT FIX)
         response = requests.post(
             HF_URL,
-            json={"data": [image]},
+            json={
+                "data": [image],
+                "fn_index": 0
+            },
             timeout=30
         )
 
@@ -101,7 +107,7 @@ def webcam():
 
         result = response.json()
 
-        # 🔥 SAFE PARSING (IMPORTANT)
+        # 🔥 SAFE PARSING
         if isinstance(result, list):
             detections = result
         elif "data" in result:

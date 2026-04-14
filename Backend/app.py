@@ -9,13 +9,15 @@ from routes.history import history_routes
 app = Flask(__name__)
 
 
-CORS(app, resources={
-    r"/api/*": {
-        "origins": [
-            "https://realtime-object-detection-webapplic.vercel.app"
-        ]
-    }
-})
+CORS(
+    app,
+    origins=[
+        "http://localhost:3000",
+        "https://realtime-object-detection-webapplic.vercel.app"
+    ],
+    allow_headers=["Content-Type", "Authorization"],
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+)
 
 
 app.register_blueprint(auth_routes, url_prefix='/api/auth')
@@ -29,5 +31,5 @@ def home():
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))  # 🔥 FIX
+    port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)

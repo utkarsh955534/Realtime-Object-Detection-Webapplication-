@@ -6,7 +6,7 @@ from utils.auth_middleware import token_required
 
 detect_routes = Blueprint('detect', __name__)
 
-# 🔥 YOUR HF URL
+# 🔥 Hugging Face API URL
 HF_URL = "https://utkarsh9555-yolo-space.hf.space/api/predict/"
 
 
@@ -30,21 +30,26 @@ def upload():
         # 🔥 Send to HF
         response = requests.post(
             HF_URL,
-            json={"data": [image_data]}
+            json={"data": [image_data]},
+            timeout=30
         )
 
         print("HF UPLOAD RESPONSE:", response.text)
 
         if response.status_code != 200:
-            return jsonify({"error": "HF failed"}), 500
+            return jsonify({
+                "error": "HF failed",
+                "status": response.status_code,
+                "response": response.text
+            }), 500
 
         result = response.json()
 
-        # 🔥 SAFE PARSING
-        if "data" in result and result["data"]:
-            detections = result["data"][0]
-        elif isinstance(result, list):
+        # 🔥 HANDLE MULTIPLE RESPONSE TYPES
+        if isinstance(result, list):
             detections = result
+        elif "data" in result:
+            detections = result["data"][0]
         else:
             return jsonify({"error": "Invalid HF response"}), 500
 
@@ -73,24 +78,31 @@ def webcam():
         if not data or "image" not in data:
             return jsonify({"error": "No image"}), 400
 
+        image = data["image"]
+
         # 🔥 Send to HF
         response = requests.post(
             HF_URL,
-            json={"data": [data["image"]]}
+            json={"data": [image]},
+            timeout=30
         )
 
         print("HF WEBCAM RESPONSE:", response.text)
 
         if response.status_code != 200:
-            return jsonify({"error": "HF failed"}), 500
+            return jsonify({
+                "error": "HF failed",
+                "status": response.status_code,
+                "response": response.text
+            }), 500
 
         result = response.json()
 
-        # 🔥 SAFE PARSING (IMPORTANT FIX)
-        if "data" in result and result["data"]:
-            detections = result["data"][0]
-        elif isinstance(result, list):
+        # 🔥 HANDLE MULTIPLE RESPONSE TYPES (IMPORTANT FIX)
+        if isinstance(result, list):
             detections = result
+        elif "data" in result:
+            detections = result["data"][0]
         else:
             return jsonify({"error": "Invalid HF response"}), 500
 

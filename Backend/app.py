@@ -9,7 +9,13 @@ from routes.history import history_routes
 app = Flask(__name__)
 
 
-CORS(app, resources={r"/api/*": {"origins": "https://realtime-object-detection-webapplic.vercel.app/"}})
+CORS(app, resources={
+    r"/api/*": {
+        "origins": [
+            "https://realtime-object-detection-webapplic.vercel.app"
+        ]
+    }
+})
 
 
 app.register_blueprint(auth_routes, url_prefix='/api/auth')

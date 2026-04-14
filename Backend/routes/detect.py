@@ -5,8 +5,8 @@ from utils.auth_middleware import token_required
 
 detect_routes = Blueprint('detect', __name__)
 
-# 🔥 YOUR HUGGING FACE URL
-HF_URL = "https://your-username-yolo-detection.hf.space/run/predict"
+
+HF_URL = "https://utkarsh9555-yolo-space.hf.space/api/predict/"
 
 
 # =========================

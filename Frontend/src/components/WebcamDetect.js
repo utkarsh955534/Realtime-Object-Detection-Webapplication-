@@ -33,7 +33,7 @@ export default function WebcamDetect() {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext("2d");
 
-      ctx.drawImage(videoRef.current, 0, 0, 640, 480);
+      ctx.drawImage(videoRef.current, 0, 0, 320, 240);
       const img = canvas.toDataURL("image/jpeg");
 
       const res = await axios.post(
@@ -66,7 +66,7 @@ export default function WebcamDetect() {
       if (videoRef.current) {
         capture();
       }
-    }, 1500);
+    }, 4000);
 
     return () => clearInterval(interval);
   }, []);

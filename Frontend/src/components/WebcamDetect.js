@@ -4,30 +4,70 @@ import axios from "axios";
 export default function WebcamDetect() {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-  const [detections, setDetections] = useState([]);
 
+  const [detections, setDetections] = useState([]);
+  const [error, setError] = useState("");
+
+  // 🎥 Start webcam
   useEffect(() => {
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(stream => videoRef.current.srcObject = stream);
+    navigator.mediaDevices
+      .getUserMedia({ video: true })
+      .then((stream) => {
+        videoRef.current.srcObject = stream;
+      })
+      .catch(() => {
+        setError("❌ Camera permission denied");
+      });
   }, []);
 
+  // 📸 Capture + Send to backend
   const capture = async () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
+    try {
+      const token = localStorage.getItem("token");
 
-    ctx.drawImage(videoRef.current, 0, 0, 640, 480);
-    const img = canvas.toDataURL("image/jpeg");
+      if (!token) {
+        setError("❌ Please login again");
+        return;
+      }
 
-    const res = await axios.post(
-      `${process.env.REACT_APP_API}/api/detect/webcam`,
-      { image: img }
-    );
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext("2d");
 
-    setDetections(res.data.detections);
+      ctx.drawImage(videoRef.current, 0, 0, 640, 480);
+      const img = canvas.toDataURL("image/jpeg");
+
+      const res = await axios.post(
+        `${process.env.REACT_APP_API}/api/detect/webcam`,
+        { image: img },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      setDetections(res.data.detections);
+      setError("");
+
+    } catch (err) {
+      console.log("WEBCAM ERROR:", err.response?.data || err.message);
+
+      if (err.response?.status === 401) {
+        setError("❌ Unauthorized! Please login again");
+      } else {
+        setError("❌ Detection failed");
+      }
+    }
   };
 
+  // 🔁 Run detection every 1.5 sec
   useEffect(() => {
-    const interval = setInterval(capture, 1500);
+    const interval = setInterval(() => {
+      if (videoRef.current) {
+        capture();
+      }
+    }, 1500);
+
     return () => clearInterval(interval);
   }, []);
 
@@ -35,14 +75,41 @@ export default function WebcamDetect() {
     <div className="card">
       <h3>Live Detection</h3>
 
-      <video ref={videoRef} autoPlay width="400" />
-      <canvas ref={canvasRef} width="640" height="480" hidden />
+      {/* Video */}
+      <video
+        ref={videoRef}
+        autoPlay
+        width="100%"
+        style={{ borderRadius: "10px" }}
+      />
 
-      {detections.map((d,i)=>(
-        <p key={i}>
-          {d.class} ({(d.confidence*100).toFixed(1)}%)
+      {/* Hidden canvas */}
+      <canvas
+        ref={canvasRef}
+        width="640"
+        height="480"
+        hidden
+      />
+
+      {/* Error */}
+      {error && (
+        <p style={{ color: "red", marginTop: "10px" }}>
+          {error}
         </p>
-      ))}
+      )}
+
+      {/* Results */}
+      {detections.length > 0 && (
+        <div style={{ marginTop: "10px" }}>
+          <h4>Detected:</h4>
+
+          {detections.map((d, i) => (
+            <p key={i}>
+              🧠 <b>{d.class}</b> → {(d.confidence * 100).toFixed(1)}%
+            </p>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

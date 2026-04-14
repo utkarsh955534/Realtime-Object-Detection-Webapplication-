@@ -31,7 +31,7 @@ export default function Upload() {
       setMessage("");
 
       const res = await axios.post(
-        "http://localhost:5000/api/detect/upload",
+        `${process.env.REACT_APP_API}/api/detect/upload`,
         formData,
         {
           headers: {

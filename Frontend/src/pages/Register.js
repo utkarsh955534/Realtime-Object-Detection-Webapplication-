@@ -12,7 +12,7 @@ export default function Register() {
   const register = async () => {
     try {
       const res = await axios.post(
-        "http://localhost:5000/api/auth/register",
+        `${process.env.REACT_APP_API}/api/auth/register`,
         { email, password }
       );
 

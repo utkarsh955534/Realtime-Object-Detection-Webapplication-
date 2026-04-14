@@ -7,7 +7,7 @@ from utils.auth_middleware import token_required
 detect_routes = Blueprint('detect', __name__)
 
 # ✅ FINAL CORRECT HF URL
-HF_URL = "https://utkarsh9555-yolo-space.hf.space/run/predict"
+HF_URL = "https://utkarsh9555-yolo-space.hf.space/predict"
 
 
 # =========================
@@ -28,13 +28,13 @@ def upload():
 
         # 🔥 Send to HF (IMPORTANT FIX)
         response = requests.post(
-            HF_URL,
-            json={
-                "data": [base64_image],
-                "fn_index": 0
-            },
-            timeout=30
-        )
+    HF_URL,
+    json={"image": image},
+    timeout=30
+)
+
+result = response.json()
+detections = result["detections"]
 
         print("HF UPLOAD RESPONSE:", response.text)
 

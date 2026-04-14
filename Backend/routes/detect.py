@@ -1,14 +1,13 @@
 from flask import Blueprint, request, jsonify
-from ultralytics import YOLO
-import cv2
-import numpy as np
+import requests
 from config.db import history
 from utils.auth_middleware import token_required
 
 detect_routes = Blueprint('detect', __name__)
 
-# 🔥 Load model once (IMPORTANT)
-model = YOLO("yolov8n.pt")
+# 🔥 YOUR HUGGING FACE URL
+HF_URL = "https://your-username-yolo-detection.hf.space/run/predict"
+
 
 # =========================
 # 📁 FILE UPLOAD DETECTION
@@ -22,24 +21,24 @@ def upload():
         if not file:
             return jsonify({"error": "File required"}), 400
 
-        # Convert file to image
-        file_bytes = np.frombuffer(file.read(), np.uint8)
-        frame = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
+        import base64
 
-        results = model(frame)
+        # Convert image → base64
+        image_bytes = file.read()
+        base64_image = base64.b64encode(image_bytes).decode("utf-8")
+        image_data = f"data:image/jpeg;base64,{base64_image}"
 
-        detections = []
+        # 🔥 Send to Hugging Face
+        response = requests.post(
+            HF_URL,
+            json={
+                "data": [image_data]
+            }
+        )
 
-        for r in results:
-            for box in r.boxes.data.tolist():
-                detections.append({
-                    "x1": box[0],
-                    "y1": box[1],
-                    "x2": box[2],
-                    "y2": box[3],
-                    "class": model.names[int(box[5])],
-                    "confidence": float(box[4])
-                })
+        result = response.json()
+
+        detections = result["data"][0]
 
         # Save history
         history.insert_one({
@@ -66,27 +65,17 @@ def webcam():
         if not data or "image" not in data:
             return jsonify({"error": "No image provided"}), 400
 
-        # Decode base64 image
-        import base64
+        # 🔥 Send directly to HF
+        response = requests.post(
+            HF_URL,
+            json={
+                "data": [data["image"]]
+            }
+        )
 
-        img_data = base64.b64decode(data["image"].split(",")[1])
-        np_arr = np.frombuffer(img_data, np.uint8)
-        frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        result = response.json()
 
-        results = model(frame)
-
-        detections = []
-
-        for r in results:
-            for box in r.boxes.data.tolist():
-                detections.append({
-                    "x1": box[0],
-                    "y1": box[1],
-                    "x2": box[2],
-                    "y2": box[3],
-                    "class": model.names[int(box[5])],
-                    "confidence": float(box[4])
-                })
+        detections = result["data"][0]
 
         return jsonify({"detections": detections})
 

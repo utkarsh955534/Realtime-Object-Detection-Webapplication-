@@ -1,0 +1,96 @@
+/* Background */
+/* FULL SCREEN GRADIENT FIX */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;   /* 🔥 important */
+}
+
+/* App root ko bhi full height do */
+#root {
+  min-height: 100vh;
+}
+
+/* Better smooth gradient */
+body {
+  font-family: 'Segoe UI', sans-serif;
+
+  background: linear-gradient(
+    135deg,
+    #1e3c72 0%,
+    #2a5298 50%,
+    #6a4ec8 100%
+  );
+
+  background-repeat: no-repeat;   /* 🔥 stop repeat */
+  background-attachment: fixed;   /* 🔥 smooth scroll */
+  
+  color: white;
+}
+
+/* Glass Card */
+.card {
+  /* width: 90%;
+  max-width: 350px;
+  margin: auto; */
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease;
+}
+.center-container {
+  display: flex;
+  justify-content: center;   /* horizontal center */
+  align-items: center;       /* vertical center */
+  height: 100vh;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+/* Input Styling */
+.input {
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  width: 95%;
+}
+
+/* Button Styling */
+.btn {
+  padding: 12px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(45deg, #ff6b6b, #f06595);
+  color: white;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(255, 0, 100, 0.4);
+}
+
+/* Navbar */
+.navbar {
+  padding: 15px;
+  background: rgba(0,0,0,0.3);
+  backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Detection box */
+.box {
+  position: absolute;
+  border: 2px solid red;
+  color: yellow;
+  font-size: 12px;
+}
